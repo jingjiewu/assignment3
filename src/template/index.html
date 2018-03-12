@@ -12,434 +12,167 @@
   <link href="w3.css" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-  <script>
-var audio;
-var playlist;
-var tracks;
-var current;
-var circleArray = [];
-var markerArray = [];
-var x;
-var ent = 'Danger';
-var poly;
-//var directionsDisplay = new google.maps.DirectionsRenderer();
-//var directionsService = new google.maps.DirectionsService();
-var map;
-
-var citymap = {
-  chicago: {
-    center: {lat: 21.285412, lng: -157.808893},
-    population: 1
-  },
-  newyork: {
-    center: {lat: 21.287371, lng: -157.810309},
-    population: 1
-  },
-  losangeles: {
-    center: {lat: 21.286131, lng: -157.807777},
-    population: 1
-  },
-  vancouver: {
-    center: {lat: 21.284091, lng: -157.810867},
-    population: 1
-  }
-};
-
-function init(){
-    current = 0;
-    audio = $('audio');
-    playlist = $('#playlist');
-    tracks = playlist.find('li a');
-    len = tracks.length - 1;
-    audio[0].volume = .10;
-    playlist.find('a').click(function(e){
-        e.preventDefault();
-        link = $(this);
-        current = link.parent().index();
-        run(link, audio[0]);
-    });
-    audio[0].addEventListener('ended',function(e){
-        current++;
-        if(current == len){
-            current = 0;
-            link = playlist.find('a')[0];
-        }else{
-            link = playlist.find('a')[current];
-        }
-        run($(link),audio[0]);
-    });
-}
-function run(link, player){
-        player.src = link.attr('href');
-        par = link.parent();
-        par.addClass('active').siblings().removeClass('active');
-        audio[0].load();
-        audio[0].play();
-}
-
-function myMap() {
-    var mapOptions = {
-        center: new google.maps.LatLng(21.285412, -157.808893),
-        zoom: 15,
-        mapTypeId: google.maps.MapTypeId.HYBRID
-    }
-map = new google.maps.Map(document.getElementById("map"), mapOptions);
-poly = new google.maps.Polyline({
-          strokeColor: '#FFFE00',
-          strokeOpacity: 1.0,
-          strokeWeight: 3
-        });
-        poly.setMap(map);
-
-        // Add a listener for the click event
-        map.addListener('click', addLatLng);
-//showZone();
-}
-
-function showZone() {
-  // Construct the circle for each value in citymap.
-  // Note: We scale the area of the circle based on the population.
-  for (var city in citymap) {
-    // Add the circle for this city to the map.
-    /*var cityCircle = new google.maps.Circle({
-      strokeColor: '#FF0000',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF0000',
-      fillOpacity: 0.35,
-      map: map,
-      center: citymap[city].center,
-      radius: Math.sqrt(citymap[city].population) * 100
-    });*/
-    showCircle(citymap[city].center);
-    //circleArray.push(cityCircle);
-    //wait(2000);
-  }
-  //removeAllcircles();
-}
-
-function removeAllcircles() {
-  for(var i in circleArray) {
-    circleArray[i].setMap(null);
-  }
-  //circleArray = []; // this is if you really want to remove them, so you reset the variable.
-}
-
-function wait(ms){
-   var start = new Date().getTime();
-   var end = start;
-   while(end < start + ms) {
-     end = new Date().getTime();
-  }
-}
-
-function myFunction() {
-    x = document.getElementById("myText").value;
-    var res = x.split(",");
-
-    var dictObj = {};
-    dictObj["lat"] = Number(res[0]);
-    dictObj["lng"] = Number(res[1]);
-
-    //document.getElementById("demo1").innerHTML = dictObj["lat"];
-    //document.getElementById("demo2").innerHTML = dictObj["lng"];
-
-    showCircle(dictObj);
-}
-
-function showCircle(loc) {
-  ent = document.getElementById("sel1").value;
-  var diff_color;
-  switch (ent) {
-    case "Danger":
-      diff_color = '#FF0000';
-      break;
-    case "Funny":
-      diff_color = '#FFD800';
-      break;
-    case "Crowd":
-      diff_color = '#309240';
-      break;
-  }
-  var cityCircle = new google.maps.Circle({
-      strokeColor: diff_color,
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: diff_color,
-      fillOpacity: 0.35,
-      map: map,
-      center: loc,
-      radius: 100
-    });
-    circleArray.push(cityCircle);
-}
-
-function adjustCircles() {
-  ent = document.getElementById("sel1").value;
-  var diff_color;
-  switch (ent) {
-    case "Danger":
-      diff_color = '#FF0000';
-      break;
-    case "Funny":
-      diff_color = '#FFD800';
-      break;
-    case "Crowd":
-      diff_color = '#309240';
-      break;
-  }
-  for(var i in circleArray) {
-    var dictObj = {};
-    var loc = circleArray[i].getCenter();
-    dictObj["lat"] = loc.lat() + 0.001 * (Math.random()-0.5);
-    dictObj["lng"] = loc.lng() + 0.001 * (Math.random()-0.5);
-    circleArray[i].setOptions({
-                        fillColor: diff_color,
-                        strokeColor: diff_color
-                    });
-    circleArray[i].setCenter(dictObj);
-    circleArray[i].setMap(map);
-  }
-}
-
-function refreshCircles() {
-  removeAllcircles();
-  adjustCircles();
-}
-
-function calcRoute() {
-    var start = new google.maps.LatLng(21.288228, -157.814988);
-    var end = new google.maps.LatLng(21.284109, -157.804603);
-    var request = {
-        origin:start,
-        destination:end,
-        travelMode: google.maps.DirectionsTravelMode.WALKING
-    };
-    var directionsDisplay = new google.maps.DirectionsRenderer();
-    var directionsService = new google.maps.DirectionsService();
-    directionsDisplay.setMap(map);
-    directionsService.route(request, function(response, status) {
-      if (status == google.maps.DirectionsStatus.OK) {
-        directionsDisplay.setDirections(response);
-      }
-    });
-}
-
-// Handles click events on a map, and adds a new point to the Polyline.
-      function addLatLng(event) {
-        var path = poly.getPath();
-
-        // Because path is an MVCArray, we can simply append a new coordinate
-        // and it will automatically appear.
-        path.push(event.latLng);
-
-        // Add a new marker at the new plotted point on the polyline.
-        var marker = new google.maps.Marker({
-          position: event.latLng,
-          title: '#' + path.getLength(),
-          map: map
-        });
-        markerArray.push(marker);
-      }
-
-function clearRoute() {
-  for(var i in markerArray) {
-    markerArray[i].setMap(null);
-  }
-  markerArray = []; // this is if you really want to remove them, so you reset the variable.
-  poly.setMap(null);
-  poly = new google.maps.Polyline({
-          strokeColor: '#FFFE00',
-          strokeOpacity: 1.0,
-          strokeWeight: 3
-        });
-        poly.setMap(map);
-}
-
-
-	</script>
 </head>
 
-<body>
-  <div class="row">
-    <div class="flex-container">
-      <div id="OHAimg">
-        <img src="../data/images/dim-sum.jpg" width="150" height="150" style="float: left;" />
-        <br />
-      </div>
-    </div>
-  </div>
+<title>Track app</title>
 
-<br /><hr><br />
+<body>
+
 
   <div class="d-flex flex-row justify-content-around my-flex-container">
-     <div class="p-2 my-flex-item">
-       <div class="card" style="width:400px">
- <img class="card-img-top" src="../data/images/RealTimeData.jpg" alt="Card image" style="width:100%">
- <div class="card-body">
-   <h4 class="card-title">Real Time Data</h4>
-   <p class="card-text">Gather real time data from multiple sources</p>
- </div>
-</div>
-     </div>
-     <div class="p-2 my-flex-item">
-       <div class="card" style="width:400px">
- <img class="card-img-top" src="../data/images/CommunityData.jpg" alt="Card image" style="width:100%">
- <div class="card-body">
-   <h4 class="card-title">Community Data</h4>
-   <p class="card-text">Gather community data from local information</p>
- </div>
-</div>
-     </div>
-     <div class="p-2 my-flex-item">
-       <div class="card" style="width:400px">
- <img class="card-img-top" src="../data/images/SendingData.jpeg" alt="Card image" style="width:100%">
- <div class="card-body">
-   <h4 class="card-title">Send Data</h4>
-   <p class="card-text">Send useful data to the app</p>
- </div>
-</div>
-     </div>
-</div>
-
-<br /><hr><br />
-
-<form>
-  <div class="form-group">
-    <label for="exampleFormControlSelect1">Example select</label>
-    <select class="form-control" id="exampleFormControlSelect1">
-      <option>Bomb Shelters</option>
-      <option>Murders</option>
-      <option>Fires</option>
-      <option>Accidents</option>
-      <option>Speed Traps</option>
-    </select>
-  <div class="form-check">
-    <div class="col-auto my-1">
-        <label class="mr-sm-2" for="inlineFormCustomSelect">Preference</label>
-        <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-          <option selected>Area of Interest</option>
-          <option value="1">1 miles</option>
-          <option value="2">5 miles</option>
-          <option value="3">10 miles</option>
-          <option value="4">25 miles</option>
-          <option value="5">50 miles</option>
-          <option value="6">100 miles</option>
-          <option value="7">Entire State</option>
-        </select>
+    <div class="p-2 my-flex-item">
+      <div id="title">
+        <img src="../data/images/target.jpg" width="150" height="150" style="align: left;" />
       </div>
-</div>
-<div class="form-group">
-  <label for="inputAddress">From Date</label>
-  <input type="text" class="form-control" id="inputToDate" placeholder="01/01/18">
-</div>
-<div class="form-group">
-  <label for="inputAddress">To Date</label>
-  <input type="text" class="form-control" id="inputFromDate" placeholder="01/02/18">
-</div>
-</form>
+    </div>
+    <div class="p-2 my-flex-item">
+      <div class ="largetitle" style="text-align:center">
+        <h1>
+          <br /><br />
+          Track App
+        </h1>
+      </div>
+    </div>
+    <div class="p-2 my-flex-item">
 
-<form>
-    <h3>Specific Address or Location</h3>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="inputEmail4">Name of this address</label>
-      <input type="email" class="form-control" id="inputEmail4" placeholder="Save this address">
     </div>
   </div>
-  <div class="form-group">
-    <label for="inputAddress">Address</label>
-    <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
-  </div>
-  <div class="form-group">
-    <label for="inputAddress2">Address 2</label>
-    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-  </div>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="inputCity">City</label>
-      <input type="text" class="form-control" id="inputCity">
+
+  <br /><hr><br />
+
+  <div class="d-flex flex-row justify-content-around my-flex-container">
+    <div class="p-2 my-flex-item">
+      <div class="card" style="width:400px">
+        <img class="card-img-top" src="../data/images/RealTimeData.jpg" alt="Card image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Real Time Data</h4>
+          <p class="card-text">Gather real time data from multiple sources</p>
+        </div>
+      </div>
     </div>
-    <div class="form-group col-md-4">
-      <label for="inputState">State</label>
-      <select id="inputState" class="form-control">
-        <option selected>Choose...</option>
-        <option>...</option>
+    <div class="p-2 my-flex-item">
+      <div class="card" style="width:400px">
+        <img class="card-img-top" src="../data/images/CommunityData.jpg" alt="Card image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Community Data</h4>
+          <p class="card-text">Gather community data from local information</p>
+        </div>
+      </div>
+    </div>
+    <div class="p-2 my-flex-item">
+      <div class="card" style="width:400px">
+        <img class="card-img-top" src="../data/images/SendingData.jpeg" alt="Card image" style="width:100%">
+        <div class="card-body">
+          <h4 class="card-title">Send Data</h4>
+          <p class="card-text">Send useful data to the app</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br /><hr><br />
+
+  <form>
+    <div class="form-group">
+      <label for="exampleFormControlSelect1">Select the type of interest</label>
+      <select class="form-control" id="exampleFormControlSelect1">
+        <option>Bomb Shelters</option>
+        <option>Murders</option>
+        <option>Fires</option>
+        <option>Accidents</option>
+        <option>Speed Traps</option>
       </select>
-    </div>
-    <div class="form-group col-md-2">
-      <label for="inputZip">Zip Code</label>
-      <input type="text" class="form-control" id="inputZip">
-    </div>
+      <div class="form-check">
+        <div class="col-auto my-1">
+          <label class="mr-sm-2" for="inlineFormCustomSelect">Preference</label>
+          <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+            <option selected>Area of Interest</option>
+            <option value="1">1 miles</option>
+            <option value="2">5 miles</option>
+            <option value="3">10 miles</option>
+            <option value="4">25 miles</option>
+            <option value="5">50 miles</option>
+            <option value="6">100 miles</option>
+            <option value="7">Entire State</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputAddress">From Date</label>
+        <input type="text" class="form-control" id="inputToDate" placeholder="01/01/18">
+      </div>
+      <div class="form-group">
+        <label for="inputAddress">To Date</label>
+        <input type="text" class="form-control" id="inputFromDate" placeholder="01/02/18">
+      </div>
+    </form>
+
+    <form>
+      <h3>Specific Address or Location</h3>
+      <div class="form-group">
+        <label for="inputAddress">Address</label>
+        <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+      </div>
+      <div class="form-group">
+        <label for="inputAddress2">Address 2</label>
+        <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="inputCity">City</label>
+          <input type="text" class="form-control" id="inputCity">
+        </div>
+        <div class="form-group col-md-4">
+          <label for="inputState">State</label>
+          <select id="inputState" class="form-control">
+            <option selected>Choose...</option>
+            <option>Hawaii</option>
+          </select>
+        </div>
+        <div class="form-group col-md-2">
+          <label for="inputZip">Zip Code</label>
+          <input type="text" class="form-control" id="inputZip">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="gridCheck">
+          <label class="form-check-label" for="gridCheck">
+            Compare this with another adddress
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="gridCheck">
+          <label class="form-check-label" for="gridCheck">
+            Find a path to this address
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <br /><hr>
+
+    <h1>See Something, Say Something</h1>
+
+    <footer>
+      <div style="text-align:center" class="footer">
+        <hr>
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Contact Information <i class="fa fa-angle-down" style="font-size:10px"></i></button>
+        <div id="demo" class="collapse">
+          <br />
+          <p><a href="https://github.com/ICS465/assignment3">Assignment 4 Group 1</a></p>
+          <p>Last Update: 3/11/18</p>
+        </div>
+      </div>
+    </footer>
+
   </div>
-  <div class="form-group">
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="gridCheck">
-      <label class="form-check-label" for="gridCheck">
-        Compare this with another adddress
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="gridCheck">
-      <label class="form-check-label" for="gridCheck">
-        Find a path to this address
-      </label>
-    </div>
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-
-<br /><hr><br />
-
-<div id="map",  class="center"></div>
-<script src="https://maps.googleapis.com/maps/api/js?callback=myMap"></script>
-
-
-<div id="test", style="width:auto;height:200px", class="center">
-Enter Location: <input type="text" id="myText" value="">
-
-<p>Click the button to post the location in the text field.</p>
-
-<button onclick="myFunction()">Post</button>
-<button onclick="refreshCircles()">Refresh</button>
-<button onclick="calcRoute()">Route</button>
-<button onclick="clearRoute()">ClearRoute</button>
-<select id="sel1">
-  <option value="Danger">Danger</option>
-  <option value="Funny">Funny</option>
-  <option value="Crowd">Crowd</option>
-</select>
-</div>
-
-<h1>See Something, Say Something</h1>
-
-<footer>
-  <div style="text-align:center" class="footer">
-    <hr>
-    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Contact Information <i class="fa fa-angle-down" style="font-size:10px"></i></button>
-    <div id="demo" class="collapse">
-      <br />
-      <p><a href="https://github.com/bigdimsum">Team DimSum</a></p>
-      <p>Last Update: 3/10/18</p>
-    </div>
-  </div>
-</footer>
-
-<script>
-	init();
-</script>
-
-<script>
-  showZone();
-  //removeAllcircles();
-</script>
-
-</div>
 </body>
 </html>
