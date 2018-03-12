@@ -16,6 +16,10 @@ h1 {
   text-align: center;
 }
 
+p {
+  color: black;
+}
+
 form {
   margin: 0 auto;
   padding-left: 60px;
